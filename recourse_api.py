@@ -1,24 +1,23 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from joblib import dump, load
 
 import recourse as rs
     
 class RecourseActions:
     def __init__(self):
         # import data
-        url = 'https://raw.githubusercontent.com/ustunb/actionable-recourse/master/examples/paper/data/credit_processed.csv'
-        df = pd.read_csv(url)
-        y, X = df.iloc[:, 0], df.iloc[:, 1:]
+        df= pd.read_csv('./data/credit_processed.csv')
+        self.y, self.X = df.iloc[:, 0], df.iloc[:, 1:]
 
         # train a classifier
-        clf = LogisticRegression(max_iter = 1000)
-        clf.fit(X, y)
+        self.clf = load('./models/logistic_regression.joblib')
 
-        yhat = clf.predict(X)
+        yhat = self.clf.predict(self.X)
 
         # customize the set of actions
-        A = rs.ActionSet(X)  ## matrix of features. ActionSet will set bounds and step sizes by default
+        A = rs.ActionSet(self.X)  ## matrix of features. ActionSet will set bounds and step sizes by default
 
         # specify immutable variables
         A['Married'].actionable = False
@@ -41,8 +40,6 @@ class RecourseActions:
         A[['Age_lt_25', 'Age_in_25_to_40', 'Age_in_40_to_59', 'Age_geq_60']].actionable = False
         A[['TotalMonthsOverdue', 'TotalOverdueCounts', 'HistoryOfOverduePayments']].actionable = False
 
-        self.X = X
-        self.clf = clf
         self.A = A
 
     def get_person(self, id=13):

@@ -44,6 +44,10 @@ class RecourseActions:
         self.X = X
         self.clf = clf
         self.A = A
+
+    def get_person(self, id=13):
+        html_str = pd.DataFrame(self.X.loc[id,:]).to_html()
+        return html_str
     
     def get_actions(self, id=13):
         # Person #13 is denied a loan (bad luck)

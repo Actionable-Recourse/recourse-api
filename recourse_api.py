@@ -41,6 +41,26 @@ class RecourseActions:
         A[['TotalMonthsOverdue', 'TotalOverdueCounts', 'HistoryOfOverduePayments']].actionable = False
 
         self.A = A
+    
+    def predict(self, param_dict):
+        cols = self.X.columns
+        vals = pd.Series(param_dict)[cols].values
+        predicted = self.clf.predict([vals])[0]
+
+        if predicted == 1:
+            return {
+                'predicted': predicted,
+                'recourse_actions': None
+            }
+        else:
+            # Let's produce a list of actions that can change this person's predictions
+            fs = rs.Flipset(vals, action_set = self.A, clf = self.clf)
+            fs.populate(enumeration_type = 'distinct_subsets', total_items = 10)
+            html_str = fs.to_html()
+            return {
+                'predicted': predicted,
+                'recourse_actions': html_str
+            }
 
     def get_person(self, id=13):
         html_str = pd.DataFrame(self.X.loc[id,:]).to_html()
@@ -50,6 +70,7 @@ class RecourseActions:
         # Person #13 is denied a loan (bad luck)
         x = self.X.values[[id]]
         yhat = self.clf.predict(x)[0]
+        print('yhat: {}'.format(yhat))
 
         # Let's produce a list of actions that can change this person's predictions
         fs = rs.Flipset(x, action_set = self.A, clf = self.clf)

@@ -42,7 +42,7 @@ class RecourseActions:
 
         self.A = A
     
-    def predict(self, param_dict):
+    def predict(self, param_dict, total_items=4):
         cols = self.X.columns
         vals = pd.Series(param_dict)[cols].values
         predicted = self.clf.predict([vals])[0]
@@ -55,11 +55,20 @@ class RecourseActions:
         else:
             # Let's produce a list of actions that can change this person's predictions
             fs = rs.Flipset(vals, action_set = self.A, clf = self.clf)
-            fs.populate(enumeration_type = 'distinct_subsets', total_items = 10)
-            html_str = fs.to_html()
+            fs.populate(enumeration_type = 'distinct_subsets', total_items = total_items)
+            # html_str = fs.to_html()
+
+            # Getting a list of dictionaries for action sets
+            big_df = fs.to_flat_df().reset_index()
+            big_df.item.unique()
+            action_lst = []
+            for item in big_df.item.unique():
+                d = big_df[big_df['item'] == item].to_dict()
+                action_lst.append(d)
+
             return {
                 'predicted': predicted,
-                'recourse_actions': html_str
+                'recourse_actions': action_lst
             }
 
     def get_person(self, id=13):

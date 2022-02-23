@@ -60,7 +60,6 @@ class RecourseActions:
 
             # Getting a list of dictionaries for action sets
             big_df = fs.to_flat_df().reset_index()
-            big_df.item.unique()
             action_lst = []
             for item in big_df.item.unique():
                 d = big_df[big_df['item'] == item].to_dict()
